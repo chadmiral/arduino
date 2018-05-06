@@ -8,13 +8,37 @@ Adafruit Arduino - Lesson 3. RGB LED
 class Color
 {
   public:
+    Color()
+    {
+      r = 0.0f;
+      g = 0.0f;
+      b = 0.0f;
+    }
+    Color(float red, float green, float blue)
+    {
+      r = red;
+      g = green;
+      b = blue;
+    }
+
+    void randomize() {
+      r = random(0.0f, 255.0f);
+      g = random(0.0f, 255.0f);
+      b = random(0.0f, 255.0f);
+    }
+    
     float r;
     float g;
     float b;
 };
 
-Color COLOR_BLACK;
-Color Incandescent;
+Color COLOR_BLACK(0.0f, 0.0f, 0.0f);
+Color COLOR_WHITE(255.0f, 255.0f, 255.0f);
+Color COLOR_RED(255.0f, 0.0f, 0.0f);
+Color COLOR_GREEN(0.0f, 255.0f, 0.0f);
+Color COLOR_BLUE(0.0f, 0.0f, 255.0f);
+Color COLOR_INCANDESCENT(255.0f, 140.0f, 30.0f);
+Color COLOR_HALOGEN(200.0f, 255.0f, 200.0f);
 
 int redPin = 11;
 int greenPin = 10;
@@ -32,13 +56,7 @@ void setup()
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
 
-  Incandescent.r = 255.0f;
-  Incandescent.g = 140.0f;
-  Incandescent.b = 30.0f;
-
-  COLOR_BLACK.r = 0.0f;
-  COLOR_BLACK.g = 0.0f;
-  COLOR_BLACK.b = 0.0f;
+  Serial.begin(9600);
 }
 
 void setColor(Color c)
@@ -83,24 +101,25 @@ void televisionLight()
 void periodicLight(Color c)
 {
   setColor(c);
-  delay(random(2000.0f, 10000.0f));
+  delay(random(5000.0f, 50000.0f));
   setColor(COLOR_BLACK);
-  delay(random(2000.0f, 10000.0f));
+  delay(random(5000.0f, 50000.0f));
 }
 
 void fireplaceLight()
 {
   Color flame[3];
   flame[0].r = 255.0f;
-  flame[0].g = 180.0f;
-  flame[0].b = 40.0f;
+  flame[0].g = 130.0f;
+  flame[0].b = 20.0f;
 
-  flame[1].r = 200.0f;
-  flame[1].g = 100.0f;
-  flame[1].b = 0.0f;
+  flame[1].r = 0.8f * 200.0f;
+  flame[1].g = 0.8f * 60.0f;
+  flame[1].b = 0.8f * 0.0f;
 
-  flame[2].r = 255.0f;
-  flame[2].g = 60.0f;
+  //darker red
+  flame[2].r = 120.0f;
+  flame[2].g = 30.0f;
   flame[2].b = 0.0f;
 
   Color prev = fireplace;
@@ -133,10 +152,59 @@ void flickerLight(Color c)
   delay(random(20.0f, 100.0f));
 }
 
+void danceParty()
+{
+  //strobe light
+  int mode = random(0, 2);
+  int loops = pow(4, (int)random(1, 3));
+  int pow4;
+  int num_loops;
+
+  Color rc;
+  rc.randomize();
+  for(int i = 0; i < loops; i++) {
+    switch(mode) {
+      case 0:
+        setColor(rc);
+        delay(10);
+        setColor(COLOR_BLACK);
+        delay(300);
+        break;
+  
+       case 1:
+          pow4 = (int)pow(4.0f, (int)random(1, 3));
+          for(int j = 0; j < pow4; j++)
+          {
+            rc.randomize();
+            int freq = pow(10, (int)random(1, 3));
+            setColor(rc);
+            delay(freq);
+            setColor(COLOR_BLACK);
+            delay(0);
+          }
+          break;
+       case 2:
+       num_loops = 500;
+       rc = Color(random(0.0f, 255.0f),random(0.0f, 255.0f), random(0.0f, 255.0f));
+       for(int j = 0; j < num_loops; j++) {
+        float brightness = 0.5f * (sin(360.0f * (float)j / (float)num_loops) + 1.0f);
+
+        Color out_c(brightness * rc.r, brightness * rc.g, brightness * rc.b);
+        setColor(out_c);
+        delay(50);
+       }
+       break;
+       default:
+        break;
+    }
+  } 
+}
+
 void loop()
 {
   //televisionLight();
-  //flickerLight(255.0f, 255.0f, 255.0f);
-  //periodicLight(Incandescent);
-  fireplaceLight();
+  //flickerLight(COLOR_HALOGEN);
+  //periodicLight(COLOR_INCANDESCENT);
+  //fireplaceLight();
+  danceParty();
 }
